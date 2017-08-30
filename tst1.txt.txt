@@ -1,12 +1,7 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 muutos
 muutos
 muutos
-=======
->>>>>>> aa
-=======
 muutos
->>>>>>> aa
+muutos
 muutos
 muutos
