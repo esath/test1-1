@@ -1,5 +1,8 @@
 tama on uusi tiedosto
 
 eka muutos tiedostoon
+<<<<<<< HEAD
 Ja toinen pieni muutos
 3.muutos
+=======
+>>>>>>> eka mukkaus ja uusi branch
