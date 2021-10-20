@@ -1,0 +1,32 @@
+---
+#This is test-playbook for finding values from json-file
+#Sample-data is from Cisco ACI controller
+
+- name: testing
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    service_grp: 
+      - automation
+
+    vnames: "[]"
+    vname_tmp: "[]"
+
+  tasks:
+
+    - name: Set origin of JSON-data
+      set_fact:
+        list: "{{lookup('file','json_test.yml') | from_json }}"
+
+    - name: Find VPCs with description 'alltenants'
+      set_fact:
+        vnames: "{{ list.attr_list | to_json | from_json | json_query(jmesquery2) | union([vname_tmp]) }}"
+      vars:
+        jmesquery2: "[?contains(descr,'{{ item }}')].name"
+      with_items: "{{ service_grp }}"
+      register: vname_tmp
+
+    - debug:
+        msg: "{{ vnames }}"
