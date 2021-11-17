@@ -27,6 +27,8 @@
         jmesquery2: "[?contains(descr,'{{ item }}')].name"
       with_items: "{{ service_grp }}"
       register: vname_tmp
+      when: taski2 is defined and taski2 == "yes"
 
     - debug:
         msg: "{{ vnames }}"
+      when: taski2 is defined and taski2 == "yes"
