@@ -1,1 +1,6 @@
 tama on uusi tiedosto
+
+eka muutos tiedostoon
+
+Ja toinen pieni muutos
+3.muutos
