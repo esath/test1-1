@@ -3,9 +3,9 @@ kind: Route
 metadata:
   name: hello-openshift
 spec:
-  host: www.example.com 1
+  host: test1.apps.mint-demo.home.noviisi.fi
   port:
-    targetPort: 8080 2
+    targetPort: 8080
   to:
     kind: Service
     name: hello-openshift
