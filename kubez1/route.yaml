@@ -3,7 +3,7 @@ kind: Route
 metadata:
   name: hello-openshift
 spec:
-  host: test1.apps.mint-demo.home.noviisi.fi
+  host: the-deployment.apps.mint-demo.home.noviisi.fi
   port:
     targetPort: 8080
   to:
