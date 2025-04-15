@@ -7,6 +7,7 @@ spec:
     deployment: hello
   type: LoadBalancer
   ports:
-  - protocol: TCP
+  - name: tcp-8080
+    protocol: TCP
     port: 8666
     targetPort: 8080
