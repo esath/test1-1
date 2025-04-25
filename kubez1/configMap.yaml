@@ -4,4 +4,4 @@ metadata:
   name: the-map
 data:
   altGreeting: "Heippa maailma taas"
-  enableRisky: "true"
+  enableRisky: "false"
