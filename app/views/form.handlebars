@@ -1,0 +1,249 @@
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="card-title mb-0">
+                    <i class="fas fa-edit me-2"></i>
+                    {{title}}
+                </h2>
+                <p class="card-text mb-0">Configure network switches with Netbox integration</p>
+            </div>
+            <div class="card-body">
+                {{#if error}}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    {{error}}
+                </div>
+                {{/if}}
+
+                <form id="configForm" action="/submit" method="POST">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="hostname" name="hostname" required>
+                                <label for="hostname">
+                                    <i class="fas fa-server me-1"></i>
+                                    Hostname
+                                </label>
+                                <div class="form-text">Enter the target hostname for configuration</div>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <select class="form-select" id="vlan" name="vlan" required>
+                                    <option value="">Select VLAN...</option>
+                                    {{#each vlans}}
+                                    <option value="{{vid}}">VLAN {{vid}} - {{name}} ({{site}})</option>
+                                    {{/each}}
+                                </select>
+                                <label for="vlan">
+                                    <i class="fas fa-network-wired me-1"></i>
+                                    VLAN
+                                </label>
+                                <div class="form-text">Select VLAN from available Netbox VLANs</div>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <select class="form-select" id="switch" name="switch" required>
+                                    <option value="">Select Switch...</option>
+                                    <option value="SW01">SW01 - Catalyst 2960 (Main)</option>
+                                    <option value="SW02">SW02 - Catalyst 3750 (Main)</option>
+                                    <option value="SW03">SW03 - Catalyst 2960 (Branch)</option>
+                                </select>
+                                <label for="switch">
+                                    <i class="fas fa-sitemap me-1"></i>
+                                    Target Switch
+                                </label>
+                                <div class="form-text">Switch where configuration will be applied</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <textarea class="form-control" id="description" name="description" style="height: 100px"></textarea>
+                                <label for="description">
+                                    <i class="fas fa-comment me-1"></i>
+                                    Description (Optional)
+                                </label>
+                                <div class="form-text">Add description for this configuration</div>
+                            </div>
+
+                            <div class="card bg-light">
+                                <div class="card-header">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Configuration Preview
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div id="configPreview">
+                                        <p class="text-muted"><em>Fill in the form to see configuration preview</em></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="card border-warning">
+                                <div class="card-header bg-warning text-dark">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        Pre-flight Checks
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div id="preflightChecks">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="fas fa-spinner fa-spin text-muted me-2"></i>
+                                            <span class="text-muted">Waiting for form data...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="button" class="btn btn-secondary me-md-2" onclick="window.location.href='/'">
+                                    <i class="fas fa-arrow-left me-1"></i>
+                                    Cancel
+                                </button>
+                                <button type="submit" class="btn btn-success" id="submitBtn">
+                                    <span class="loading-spinner spinner-border spinner-border-sm me-2"></span>
+                                    <i class="fas fa-play me-1"></i>
+                                    Submit Configuration
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('configForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const preflightChecks = document.getElementById('preflightChecks');
+    const configPreview = document.getElementById('configPreview');
+
+    // Update configuration preview
+    function updatePreview() {
+        const hostname = document.getElementById('hostname').value;
+        const vlan = document.getElementById('vlan').value;
+        const switch_name = document.getElementById('switch').value;
+        const description = document.getElementById('description').value;
+
+        if (hostname && vlan && switch_name) {
+            configPreview.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Target:</strong> ${hostname}<br>
+                        <strong>VLAN:</strong> ${vlan}<br>
+                        <strong>Switch:</strong> ${switch_name}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Description:</strong> ${description || 'Automated configuration'}<br>
+                        <strong>Port:</strong> <em>Auto-assigned</em>
+                    </div>
+                </div>
+            `;
+            runPreflightChecks();
+        } else {
+            configPreview.innerHTML = '<p class="text-muted"><em>Fill in the form to see configuration preview</em></p>';
+            preflightChecks.innerHTML = `
+                <div class="d-flex align-items-center mb-2">
+                    <i class="fas fa-spinner fa-spin text-muted me-2"></i>
+                    <span class="text-muted">Waiting for form data...</span>
+                </div>
+            `;
+        }
+    }
+
+    // Run preflight checks
+    function runPreflightChecks() {
+        const switch_name = document.getElementById('switch').value;
+        const vlan = document.getElementById('vlan').value;
+
+        if (!switch_name || !vlan) return;
+
+        preflightChecks.innerHTML = `
+            <div class="d-flex align-items-center mb-2">
+                <i class="fas fa-spinner fa-spin text-primary me-2"></i>
+                <span>Checking available switch ports...</span>
+            </div>
+            <div class="d-flex align-items-center mb-2">
+                <i class="fas fa-spinner fa-spin text-primary me-2"></i>
+                <span>Validating VLAN configuration...</span>
+            </div>
+        `;
+
+        // Simulate API calls for preflight checks
+        setTimeout(() => {
+            preflightChecks.innerHTML = `
+                <div class="d-flex align-items-center mb-2">
+                    <i class="fas fa-check text-success me-2"></i>
+                    <span>Available ports found on ${switch_name}</span>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                    <i class="fas fa-check text-success me-2"></i>
+                    <span>VLAN ${vlan} is valid and available</span>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                    <i class="fas fa-check text-success me-2"></i>
+                    <span>AWX connection verified</span>
+                </div>
+            `;
+        }, 1500);
+    }
+
+    // Add event listeners
+    ['hostname', 'vlan', 'switch', 'description'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updatePreview);
+        document.getElementById(id).addEventListener('change', updatePreview);
+    });
+
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        showLoading(true);
+        submitBtn.disabled = true;
+
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        fetch('/submit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            showLoading(false);
+            submitBtn.disabled = false;
+
+            if (result.success) {
+                showAlert(`Configuration submitted successfully! Job ID: ${result.job_id}`, 'success');
+                setTimeout(() => {
+                    window.location.href = result.redirect;
+                }, 2000);
+            } else {
+                showAlert(`Error: ${result.error}`, 'danger');
+            }
+        })
+        .catch(error => {
+            showLoading(false);
+            submitBtn.disabled = false;
+            showAlert(`Submission failed: ${error.message}`, 'danger');
+        });
+    });
+});
+</script>

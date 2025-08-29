@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "awx-netbox-frontend.fullname" . }}-config
+  labels:
+    {{- include "awx-netbox-frontend.labels" . | nindent 4 }}
+data:
+  netbox-url: {{ .Values.config.netbox.url | quote }}
+  awx-url: {{ .Values.config.awx.url | quote }}
+  awx-job-template-id: {{ .Values.config.awx.jobTemplateId | quote }}
+  awx-rollback-template-id: {{ .Values.config.awx.rollbackTemplateId | quote }}
+  awx-inventory-id: {{ .Values.config.awx.inventoryId | quote }}
