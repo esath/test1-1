@@ -1,0 +1,281 @@
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 class="card-title mb-0">
+                    <i class="fas fa-cog me-2"></i>
+                    {{title}}
+                </h2>
+                <div class="d-flex justify-content-between align-items-center">
+                    <p class="card-text mb-0">Detailed job information and output</p>
+                    <a href="/status" class="btn btn-light btn-sm">
+                        <i class="fas fa-arrow-left me-1"></i>
+                        Back to Status
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                {{#if error}}
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    {{error}}
+                </div>
+                {{else}}
+                {{#if job}}
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Job Information
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <dl class="row">
+                                    <dt class="col-sm-4">Job ID:</dt>
+                                    <dd class="col-sm-8">
+                                        <strong>{{job.id}}</strong>
+                                        {{#if job.mock}}
+                                        <span class="badge bg-secondary ms-1">DEMO</span>
+                                        {{/if}}
+                                    </dd>
+                                    
+                                    <dt class="col-sm-4">Name:</dt>
+                                    <dd class="col-sm-8">{{job.name}}</dd>
+                                    
+                                    <dt class="col-sm-4">Status:</dt>
+                                    <dd class="col-sm-8">
+                                        <span class="badge status-badge status-{{job.status}}">
+                                            {{#eq job.status 'pending'}}
+                                            <i class="fas fa-clock me-1"></i>
+                                            {{/eq}}
+                                            {{#eq job.status 'running'}}
+                                            <i class="fas fa-spinner fa-spin me-1"></i>
+                                            {{/eq}}
+                                            {{#eq job.status 'successful'}}
+                                            <i class="fas fa-check me-1"></i>
+                                            {{/eq}}
+                                            {{#eq job.status 'failed'}}
+                                            <i class="fas fa-times me-1"></i>
+                                            {{/eq}}
+                                            {{job.status}}
+                                        </span>
+                                    </dd>
+                                    
+                                    <dt class="col-sm-4">Playbook:</dt>
+                                    <dd class="col-sm-8">{{job.playbook}}</dd>
+                                    
+                                    <dt class="col-sm-4">Started:</dt>
+                                    <dd class="col-sm-8">
+                                        {{#if job.started}}
+                                        {{formatDate job.started}}
+                                        {{else}}
+                                        <em>Not started</em>
+                                        {{/if}}
+                                    </dd>
+                                    
+                                    <dt class="col-sm-4">Finished:</dt>
+                                    <dd class="col-sm-8">
+                                        {{#if job.finished}}
+                                        {{formatDate job.finished}}
+                                        {{else}}
+                                        <em>In progress</em>
+                                        {{/if}}
+                                    </dd>
+                                    
+                                    <dt class="col-sm-4">Duration:</dt>
+                                    <dd class="col-sm-8">
+                                        {{#if job.elapsed}}
+                                        {{job.elapsed}} seconds
+                                        {{else}}
+                                        <em>N/A</em>
+                                        {{/if}}
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        {{#if task}}
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-cogs me-1"></i>
+                                    Configuration Data
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <dl class="row">
+                                    <dt class="col-sm-4">Hostname:</dt>
+                                    <dd class="col-sm-8"><strong>{{task.data.hostname}}</strong></dd>
+                                    
+                                    <dt class="col-sm-4">Switch:</dt>
+                                    <dd class="col-sm-8">{{task.data.switch}}</dd>
+                                    
+                                    <dt class="col-sm-4">VLAN:</dt>
+                                    <dd class="col-sm-8">{{task.data.vlan}}</dd>
+                                    
+                                    <dt class="col-sm-4">Port:</dt>
+                                    <dd class="col-sm-8">{{task.data.port}}</dd>
+                                    
+                                    <dt class="col-sm-4">Description:</dt>
+                                    <dd class="col-sm-8">{{task.data.description}}</dd>
+                                    
+                                    {{#if task.type}}
+                                    <dt class="col-sm-4">Type:</dt>
+                                    <dd class="col-sm-8">
+                                        <span class="badge bg-warning">{{task.type}}</span>
+                                    </dd>
+                                    {{/if}}
+                                </dl>
+                            </div>
+                        </div>
+                        {{/if}}
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-terminal me-1"></i>
+                                    Job Output
+                                </h5>
+                                <div class="btn-group btn-group-sm">
+                                    {{#if job.url}}
+                                    <a href="{{job.url}}" class="btn btn-outline-primary" target="_blank">
+                                        <i class="fas fa-external-link-alt me-1"></i>
+                                        View in AWX
+                                    </a>
+                                    {{/if}}
+                                    <button class="btn btn-outline-secondary" onclick="refreshStatus()">
+                                        <i class="fas fa-sync-alt me-1"></i>
+                                        Refresh
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <pre class="bg-dark text-light p-3 rounded" style="max-height: 400px; overflow-y: auto;">{{#if job.result_stdout}}{{job.result_stdout}}{{else}}{{#if job.mock}}This is a demo job. In a real environment, you would see the actual Ansible playbook output here.
+
+PLAY [Configure Network Switch] ***********************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [{{task.data.switch}}]
+
+TASK [Configure VLAN {{task.data.vlan}}] ******************************************
+changed: [{{task.data.switch}}]
+
+TASK [Configure Port {{task.data.port}}] ***************************************
+changed: [{{task.data.switch}}]
+
+PLAY RECAP *********************************************************************
+{{task.data.switch}}                  : ok=3    changed=2    unreachable=0    failed=0{{else}}Job output will appear here when available...{{/if}}{{/if}}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            {{#and (eq job.status 'successful') (not task.type)}}
+                            <button class="btn btn-warning me-md-2" onclick="rollbackJob('{{job.id}}')">
+                                <i class="fas fa-undo me-1"></i>
+                                Rollback Configuration
+                            </button>
+                            {{/and}}
+                            {{#or (eq job.status 'pending') (eq job.status 'running')}}
+                            <button class="btn btn-danger me-md-2" onclick="cancelJob('{{job.id}}')" disabled>
+                                <i class="fas fa-stop me-1"></i>
+                                Cancel Job
+                            </button>
+                            {{/or}}
+                            <a href="/form" class="btn btn-success">
+                                <i class="fas fa-plus me-1"></i>
+                                New Configuration
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {{/if}}
+                {{/if}}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function refreshStatus() {
+    window.location.reload();
+}
+
+function rollbackJob(jobId) {
+    if (!confirm(`Are you sure you want to rollback job ${jobId}? This will submit a new rollback job to AWX.`)) {
+        return;
+    }
+
+    showLoading(true);
+
+    fetch(`/rollback/${jobId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(result => {
+        showLoading(false);
+        
+        if (result.success) {
+            showAlert(`Rollback job submitted successfully! Job ID: ${result.rollback_job_id}`, 'success');
+            setTimeout(() => {
+                window.location.href = `/status/${result.rollback_job_id}`;
+            }, 2000);
+        } else {
+            showAlert(`Rollback failed: ${result.error}`, 'danger');
+        }
+    })
+    .catch(error => {
+        showLoading(false);
+        showAlert(`Rollback failed: ${error.message}`, 'danger');
+    });
+}
+
+function cancelJob(jobId) {
+    if (!confirm(`Are you sure you want to cancel job ${jobId}?`)) {
+        return;
+    }
+
+    showLoading(true);
+
+    fetch(`/cancel/${jobId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(result => {
+        showLoading(false);
+        
+        if (result.success) {
+            showAlert('Job cancellation requested', 'success');
+            setTimeout(refreshStatus, 2000);
+        } else {
+            showAlert(`Cancel failed: ${result.error}`, 'danger');
+        }
+    })
+    .catch(error => {
+        showLoading(false);
+        showAlert(`Cancel failed: ${error.message}`, 'danger');
+    });
+}
+
+// Auto-refresh status every 10 seconds for running jobs
+{{#or (eq job.status 'pending') (eq job.status 'running')}}
+setInterval(refreshStatus, 10000);
+{{/or}}
+</script>

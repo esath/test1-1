@@ -1,0 +1,22 @@
+apiVersion: v2
+name: awx-netbox-frontend
+description: A Helm chart for AWX frontend with Netbox integration for OpenShift 4.19
+
+# Application chart for deploying web interface to Ansible AWX with Netbox IPAM integration
+type: application
+
+# Chart version
+version: 0.1.0
+
+# Application version
+appVersion: "1.0.0"
+
+keywords:
+  - ansible
+  - awx
+  - netbox
+  - openshift
+  - automation
+
+maintainers:
+  - name: "esath"
